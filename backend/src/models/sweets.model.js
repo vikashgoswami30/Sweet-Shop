@@ -23,6 +23,10 @@ const sweetSchema = new Schema({
         type: Boolean,     
         default: true,   
     }, 
+    sweetImage: {
+        type: String,
+        default: null,
+    },
 }, {   
     timestamps: true,
 }); 
