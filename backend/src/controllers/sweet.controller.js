@@ -4,24 +4,29 @@ import { ApiError } from "../utils/ApiError.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 const addSweet = asyncHandler(async (req, res) => {
+  console.log("FILE 👉", req.file);
+
   const { name, flavor, price, category } = req.body;
-  if ([name, flavor, price, category].some((field) => field?.trim() === "")) {
+  if ([name, flavor, category].some((field) => !field?.trim()) || !price) {
     throw new ApiError(400, "All sweets fields are required");
   }
 
-  const sweetImageLocalPath = req.files?.sweetImage[0]?.path;
+  const sweetImageLocalPath = req.file?.path;
   if (!sweetImageLocalPath) {
-    throw new ApiError(400, "Sweet image is required");
+    throw new ApiError(400, "Sweetlocalpath image is required");
   }
 
   const sweetImage = await uploadOnCloudinary(sweetImageLocalPath);
   if (!sweetImage) {
-    throw new ApiError(400, "Sweet Image is required");
+    throw new ApiError(
+      400,
+      "Sweet Image is required for uploading into cloudinary"
+    );
   }
 
   const sweetCreated = await Sweet.create({
     name,
-    sweetImage: sweetImage?.url || "",
+    sweetImage: sweetImage.secure_url,
     flavor,
     price,
     category,

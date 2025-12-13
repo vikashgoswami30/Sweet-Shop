@@ -16,7 +16,7 @@ const sweetSchema = new Schema({
     },  
     category: {    
         type: String,     
-        enum: ['candy', 'chocolate', 'pastry', 'other'], 
+        enum: ['candy', 'chocolate', 'pastry', 'chasni', 'barfi', 'ladoo', 'halwa', 'other'], 
         default: 'other', 
     },
     inStock: {          
