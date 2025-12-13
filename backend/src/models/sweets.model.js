@@ -30,5 +30,7 @@ const sweetSchema = new Schema({
 }, {   
     timestamps: true,
 }); 
-
+sweetSchema.pre('save', function() {
+    this.inStock = this.quantity > 0;
+});
 export const Sweet = mongoose.model("Sweet",sweetSchema)

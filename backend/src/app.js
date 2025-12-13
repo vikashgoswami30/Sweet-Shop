@@ -16,6 +16,6 @@ import sweetRouter from "./routes/sweet.routes.js";
 
 //routes declaration
 app.use("/api/auth", userRouter);
-app.use("/api",sweetRouter);
+app.use("/api/sweets", sweetRouter);
 
 export { app };
