@@ -6,12 +6,15 @@ import { useSweets } from '../services/hooks/useSweets.js';
 import { SweetCard } from '../components/sweets/SweetsCard.jsx';
 import { SearchBar } from '../components/sweets/SearchBar.jsx';
 import { AddSweetModal } from '../components/sweets/AddSweetModal.jsx';
+import { EditSweetModal } from '../components/sweets/EditSweetModal.jsx';
 import { Button } from '../components/common/Button.jsx';
 
 export const DashboardPage = () => {
   const { user, logout, isAdmin } = useAuth();
   const { sweets, loading, searchSweets, purchaseSweet, restockSweet, deleteSweet, fetchSweets } = useSweets();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedSweet, setSelectedSweet] = useState(null);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -62,9 +65,19 @@ export const DashboardPage = () => {
     }
   };
 
+  const handleEdit = (sweet) => {
+    setSelectedSweet(sweet);
+    setShowEditModal(true);
+  };
+
+  const handleEditSuccess = () => {
+    fetchSweets();
+    setShowEditModal(false);
+    setSelectedSweet(null);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-purple-50 to-indigo-50">
-      {/* Header */}
       <header className="bg-white shadow-md sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-3xl font-bold text-purple-600">🍬 Sweet Shop</h1>
@@ -87,7 +100,6 @@ export const DashboardPage = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Search and Add Section */}
         <div className="mb-8 flex gap-4 flex-wrap">
           <div className="flex-1 min-w-[300px]">
             <SearchBar onSearch={handleSearch} />
@@ -101,7 +113,6 @@ export const DashboardPage = () => {
           )}
         </div>
 
-        {/* Sweets Grid */}
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <Loader2 className="animate-spin text-purple-600" size={48} />
@@ -120,17 +131,27 @@ export const DashboardPage = () => {
                 onPurchase={handlePurchase}
                 onRestock={handleRestock}
                 onDelete={handleDelete}
+                onEdit={handleEdit}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* Add Sweet Modal */}
       <AddSweetModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSuccess={fetchSweets}
+      />
+
+      <EditSweetModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedSweet(null);
+        }}
+        onSuccess={handleEditSuccess}
+        sweet={selectedSweet}
       />
     </div>
   );

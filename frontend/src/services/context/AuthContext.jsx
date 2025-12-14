@@ -8,26 +8,42 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in on mount
     const token = localStorage.getItem('accessToken');
     const userData = localStorage.getItem('user');
     
     if (token && userData) {
-      setUser(JSON.parse(userData));
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        console.log('Loaded user from storage:', parsedUser); 
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('user');
+        localStorage.removeItem('accessToken');
+      }
     }
     setLoading(false);
   }, []);
 
   const login = async (credentials) => {
     const response = await authAPI.login(credentials);
-    localStorage.setItem('accessToken', response.data.accessToken);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
-    setUser(response.data.user);
+    console.log('Login response:', response); 
+    
+    const userData = response.data.user;
+    const token = response.data.accessToken;
+    
+    localStorage.setItem('accessToken', token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);
+    
+    console.log('User logged in:', userData); 
     return response;
   };
 
   const register = async (userData) => {
-    return await authAPI.register(userData);
+    const response = await authAPI.register(userData);
+    console.log('Register response:', response); 
+    return response;
   };
 
   const logout = async () => {
@@ -42,7 +58,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const isAdmin = () => user?.role === 'admin';
+  const isAdmin = () => {
+    console.log('Checking admin - user:', user); 
+    return user?.role === 'admin';
+  };
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin }}>

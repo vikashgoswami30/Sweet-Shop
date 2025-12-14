@@ -3,59 +3,62 @@ import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
-const generateAccessAndRefreshTokens = async (userId)=>{
+const generateAccessAndRefreshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
-    const accessToken =  user.generateAccessToken(userId); 
-    const refreshToken =  user.generateRefreshToken(userId);
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
 
     return { accessToken, refreshToken };
-  }
-  catch (error) {
+  } catch (error) {
     throw new ApiError(500, "Error generating tokens");
-  } 
-}
+  }
+};
 
 const registerUser = asyncHandler(async (req, res) => {
-  const { fullName, username,email, password } = req.body;
-  if (
-    [fullName, email, username, password].some((field) => field?.trim() === "")
-  ) {
-    throw new ApiError(400, "All filed are required");
+  const { fullName, username, email, password, role } = req.body; 
+  
+  if ([fullName, email, username, password].some((field) => field?.trim() === "")) {
+    throw new ApiError(400, "All fields are required");
   }
+  
   const existedUser = await User.findOne({
     $or: [{ username }, { email }],
   });
 
   if (existedUser) {
-    throw new ApiError(409, "User already exist !!!");
+    throw new ApiError(409, "User already exists");
   }
+
+  const userRole = role && ['admin', 'user'].includes(role) ? role : 'user';
 
   const user = await User.create({
     fullName,
     email,
     password,
     username: username.toLowerCase(),
+    role: userRole, 
   });
 
-  const createdUser = await User.findById(user._id).select(
-    "-password -refreshToken"
-  );
+  const createdUser = await User.findById(user._id).select("-password -refreshToken");
 
   if (!createdUser) {
-    throw new ApiError(500, "Error while registring user");
+    throw new ApiError(500, "Error while registering user");
   }
+  
+  console.log('User registered with role:', createdUser.role); 
+  
   return res
     .status(201)
-    .json(new ApiResponse(200, createdUser, "User register successfully"));
+    .json(new ApiResponse(200, createdUser, "User registered successfully"));
 });
 
 const loginUser = asyncHandler(async (req, res) => {
   const { email, username, password } = req.body;
 
-  if (!username || !email) {
+  if (!username && !email) {
     throw new ApiError(400, "Username or email is required");
   }
 
@@ -94,7 +97,7 @@ const loginUser = asyncHandler(async (req, res) => {
       new ApiResponse(
         200,
         {
-          user: loggedInUser,
+          user: loggedInUser,  
           accessToken,
           refreshToken
         },
@@ -103,4 +106,4 @@ const loginUser = asyncHandler(async (req, res) => {
     );
 });
 
-export { registerUser ,loginUser};
+export { registerUser, loginUser };

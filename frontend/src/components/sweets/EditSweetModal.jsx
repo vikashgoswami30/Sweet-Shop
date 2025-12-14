@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal } from '../common/Modal.jsx';
 import { Button } from '../common/Button.jsx';
 import { Input } from '../common/Input.jsx';
@@ -7,7 +7,7 @@ import { sweetsAPI } from '../../services/api.js';
 
 const CATEGORIES = ['candy', 'chocolate', 'pastry', 'chasni', 'barfi', 'ladoo', 'halwa', 'other'];
 
-export const AddSweetModal = ({ isOpen, onClose, onSuccess }) => {
+export const EditSweetModal = ({ isOpen, onClose, onSuccess, sweet }) => {
   const [formData, setFormData] = useState({
     name: '',
     flavor: '',
@@ -19,6 +19,18 @@ export const AddSweetModal = ({ isOpen, onClose, onSuccess }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState(false);
+
+  useEffect(() => {
+    if (sweet) {
+      setFormData({
+        name: sweet.name || '',
+        flavor: sweet.flavor || '',
+        price: sweet.price || '',
+        quantity: sweet.quantity || '',
+        category: sweet.category || 'candy',
+      });
+    }
+  }, [sweet]);
 
   const validate = () => {
     const newErrors = {};
@@ -43,10 +55,6 @@ export const AddSweetModal = ({ isOpen, onClose, onSuccess }) => {
       newErrors.quantity = quantityError;
     }
     
-    if (!image) {
-      newErrors.image = 'Image is required';
-    }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -58,17 +66,21 @@ export const AddSweetModal = ({ isOpen, onClose, onSuccess }) => {
 
     try {
       setLoading(true);
-      const data = new FormData();
-      data.append('name', formData.name);
-      data.append('flavor', formData.flavor);
-      data.append('price', formData.price);
-      data.append('quantity', formData.quantity);
-      data.append('category', formData.category);
-      data.append('sweetImage', image);
-
-      await sweetsAPI.create(data);
       
-      setFormData({ name: '', flavor: '', price: '', quantity: '', category: 'candy' });
+      if (image) {
+        const data = new FormData();
+        data.append('name', formData.name);
+        data.append('flavor', formData.flavor);
+        data.append('price', formData.price);
+        data.append('quantity', formData.quantity);
+        data.append('category', formData.category);
+        data.append('sweetImage', image);
+
+        await sweetsAPI.update(sweet._id, data);
+      } else {
+        await sweetsAPI.update(sweet._id, formData);
+      }
+      
       setImage(null);
       setTouched(false);
       setErrors({});
@@ -76,7 +88,7 @@ export const AddSweetModal = ({ isOpen, onClose, onSuccess }) => {
       onSuccess();
       onClose();
     } catch (error) {
-      setErrors({ form: error.message || 'Failed to add sweet' });
+      setErrors({ form: error.message || 'Failed to update sweet' });
     } finally {
       setLoading(false);
     }
@@ -98,7 +110,6 @@ export const AddSweetModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const handleClose = () => {
-    setFormData({ name: '', flavor: '', price: '', quantity: '', category: 'candy' });
     setImage(null);
     setErrors({});
     setTouched(false);
@@ -106,7 +117,7 @@ export const AddSweetModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Add New Sweet">
+    <Modal isOpen={isOpen} onClose={handleClose} title="Edit Sweet">
       {errors.form && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
           {errors.form}
@@ -176,7 +187,7 @@ export const AddSweetModal = ({ isOpen, onClose, onSuccess }) => {
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Image <span className="text-red-500">*</span>
+            Image <span className="text-gray-500">(optional - leave empty to keep current)</span>
           </label>
           <input
             type="file"
@@ -184,8 +195,10 @@ export const AddSweetModal = ({ isOpen, onClose, onSuccess }) => {
             onChange={handleImageChange}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
           />
-          {touched && errors.image && <p className="mt-1 text-sm text-red-500">{errors.image}</p>}
           {image && <p className="mt-1 text-sm text-green-600">✓ {image.name}</p>}
+          {!image && sweet?.sweetImage && (
+            <p className="mt-1 text-sm text-gray-500">Current image will be kept</p>
+          )}
         </div>
 
         <div className="flex gap-3 pt-4">
@@ -201,7 +214,7 @@ export const AddSweetModal = ({ isOpen, onClose, onSuccess }) => {
             loading={loading}
             className="flex-1"
           >
-            {loading ? 'Adding...' : 'Add Sweet'}
+            {loading ? 'Updating...' : 'Update Sweet'}
           </Button>
         </div>
       </div>

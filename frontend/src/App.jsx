@@ -1,10 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './services/context/AuthContext.jsx';
+import { LandingPage } from './pages/LandingPage.jsx';
 import { LoginPage } from './pages/LoginForm.jsx';
 import { RegisterPage } from './pages/RegisterPage.jsx';
 import { DashboardPage } from './pages/DashboardPage.jsx';
 
-// Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -19,7 +19,6 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" />;
 };
 
-// Public Route Component (redirect to dashboard if logged in)
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
@@ -39,7 +38,15 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          {/* Public Routes */}
+          <Route
+            path="/"
+            element={
+              <PublicRoute>
+                <LandingPage />
+              </PublicRoute>
+            }
+          />
+          
           <Route
             path="/login"
             element={
@@ -48,6 +55,7 @@ function App() {
               </PublicRoute>
             }
           />
+          
           <Route
             path="/register"
             element={
@@ -57,7 +65,6 @@ function App() {
             }
           />
 
-          {/* Protected Routes */}
           <Route
             path="/dashboard"
             element={
@@ -67,11 +74,7 @@ function App() {
             }
           />
 
-          {/* Default Route */}
-          <Route path="/" element={<Navigate to="/dashboard" />} />
-          
-          {/* 404 Route */}
-          <Route path="*" element={<Navigate to="/login" />} />
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -1,9 +1,9 @@
-import { ShoppingCart, Package, Trash2 } from 'lucide-react';
+import { ShoppingCart, Package, Trash2, Pencil } from 'lucide-react';
 import { Button } from '../common/Button.jsx';
 import { Card } from '../common/Card.jsx';
 import { useAuth } from '../../services/context/AuthContext.jsx';
 
-export const SweetCard = ({ sweet, onPurchase, onRestock, onDelete }) => {
+export const SweetCard = ({ sweet, onPurchase, onRestock, onDelete, onEdit }) => {
   const { isAdmin } = useAuth();
 
   return (
@@ -47,6 +47,15 @@ export const SweetCard = ({ sweet, onPurchase, onRestock, onDelete }) => {
           
           {isAdmin() && (
             <>
+              <Button
+                onClick={() => onEdit(sweet)}
+                variant="secondary"
+                size="md"
+                title="Edit"
+              >
+                <Pencil size={18} />
+              </Button>
+              
               <Button
                 onClick={() => onRestock(sweet)}
                 variant="success"
