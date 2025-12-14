@@ -10,9 +10,17 @@ app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
 app.use(cookieParser());
 
+app.get("/", (req, res) => {
+  res.json({
+    message: "Sweet Shop API is running! 🍬",
+    status: "success"
+  });
+});
+
 //import routes
 import userRouter from "./routes/user.routes.js";
 import sweetRouter from "./routes/sweet.routes.js";
+
 
 //routes declaration
 app.use("/api/auth", userRouter);
