@@ -7,7 +7,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 const addSweet = asyncHandler(async (req, res) => {
 
-  const { name, flavor, price, category } = req.body;
+  const { name, flavor, price, category ,quantity} = req.body;
   if ([name, flavor, category].some((field) => !field?.trim()) || !price) {
     throw new ApiError(400, "All sweets fields are required");
   }
@@ -31,13 +31,13 @@ const addSweet = asyncHandler(async (req, res) => {
     flavor,
     price,
     category,
+    quantity: quantity || 10,
   });
   return res
     .status(201)
     .json(new ApiResponse(200, sweetCreated, "Sweet created successfully"));
 });
 
-// Get all sweets
 const getAllSweets = asyncHandler(async (req, res) => {
   const sweets = await Sweet.find().sort({ createdAt: -1 });
   
@@ -116,7 +116,6 @@ const deleteSweet = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "Sweet deleted successfully"));
 });
 
-// Purchase sweet
 const purchaseSweet = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { quantity } = req.body;
@@ -142,7 +141,6 @@ const purchaseSweet = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, sweet, `Successfully purchased ${quantity} ${sweet.name}`));
 });
 
-// Restock sweet (Admin only)
 const restockSweet = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { quantity } = req.body;

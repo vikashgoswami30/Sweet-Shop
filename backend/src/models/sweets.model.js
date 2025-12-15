@@ -1,36 +1,54 @@
-import mongoose, {Schema} from 'mongoose';
+import mongoose, { Schema } from "mongoose";
 
-const sweetSchema = new Schema({   
-    name: {     
-        type: String,     
-        required: true,   
-    },  
-    flavor: {   
-        type: String,     
-        required: true,   
-    },  
+const sweetSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    flavor: {
+      type: String,
+      required: true,
+    },
     price: {
-        type: Number,   
-        required: true, 
-        min: 0, 
-    },  
-    category: {    
-        type: String,     
-        enum: ['candy', 'chocolate', 'pastry', 'chasni', 'barfi', 'ladoo', 'halwa', 'other'], 
-        default: 'other', 
+      type: Number,
+      required: true,
+      min: 0,
     },
-    inStock: {          
-        type: Boolean,     
-        default: true,   
-    }, 
+    category: {
+      type: String,
+      enum: [
+        "candy",
+        "chocolate",
+        "pastry",
+        "chasni",
+        "barfi",
+        "ladoo",
+        "halwa",
+        "other",
+      ],
+      default: "other",
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      default: 100, 
+      min: 0,
+    },
+    inStock: {
+      type: Boolean,
+      default: true,
+    },
     sweetImage: {
-        type: String,
-        default: null,
+      type: String,
+      default: null,
     },
-}, {   
+  },
+  {
     timestamps: true,
-}); 
-sweetSchema.pre('save', function() {
-    this.inStock = this.quantity > 0;
+  }
+);
+sweetSchema.pre("save", function () {
+  this.inStock = this.quantity > 0;
 });
-export const Sweet = mongoose.model("Sweet",sweetSchema)
+export const Sweet = mongoose.model("Sweet", sweetSchema);
